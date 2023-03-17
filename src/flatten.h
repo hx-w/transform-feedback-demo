@@ -22,6 +22,13 @@ struct pair_hash {
 
 using Weights = std::unordered_map<OrderedEdge, float, pair_hash>;
 
+struct FlattenParam {
+    std::vector<int> vts_bound;
+    std::vector<int> vts_inner;
+    std::vector<glm::vec3> mapped_boundary;
+    Weights weights;
+};
+
 class Flatten {
 public:
     static void mark_edges(

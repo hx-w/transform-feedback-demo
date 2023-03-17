@@ -9,7 +9,7 @@
 
 namespace TFDEMO {
 
-Render::Render() {
+Render::Render(): viewer(std::make_shared<Render>(*this)) {
     // create a window with the specified width, height and title and initialize
     // OpenGL
     init(800, 600, "Demo");
@@ -95,7 +95,7 @@ void Render::cleanup() {
 	glfwTerminate();
 }
 
-void Render::set_mesh(Vertices& vs, Faces& fs) {
+void Render::set_mesh(Vertices& vs, Faces& fs, std::shared_ptr<FlattenParam> prm) {
     vertices.swap(vs);
     faces.swap(fs);
 
@@ -104,7 +104,6 @@ void Render::set_mesh(Vertices& vs, Faces& fs) {
     glBindVertexArray(vao);
 
     // create a vertex buffer object
-    GLuint vbo = 0, ebo = 0;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
@@ -122,6 +121,43 @@ void Render::set_mesh(Vertices& vs, Faces& fs) {
 
     // unbind the VAO
     glBindVertexArray(0);
+
+    // transfer prm to param
+    param = prm;
+    viewer.set(std::make_shared<Render>(*this));
+}
+
+void Render::active_flatten() {
+    if (flatten_stage == 0) {
+        flatten_stage = 1;
+
+        for (int i = 0; i < param->vts_bound.size(); ++i) {
+            vertices[param->vts_bound[i]].position = param->mapped_boundary[i];
+        }
+
+        glBindVertexArray(vao);
+
+        // create a vertex buffer object
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(Face), faces.data(), GL_DYNAMIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, seq_ind));
+        glEnableVertexAttribArray(1);
+        glBindVertexArray(0);
+    }
+    else if (flatten_stage == 1) {
+        flatten_stage = 2;
+    }
+    std::clog << "flatten stage: " << flatten_stage << std::endl;
+}
+
+void Render::pause_flatten() {
+    if (flatten_stage == 2) {
+        flatten_stage = 1;
+    }
 }
 
 int Render::draw() {
@@ -133,11 +169,11 @@ int Render::draw() {
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         viewer.processInput(window);
+        glLineWidth(2.0f);
         // if vao is not initialized, initialize it
         if (vao != 0) {
             shader.use();
             glBindVertexArray(vao);
-            glLineWidth(2.0f);
             // draw the triangle
             glDrawElements(GL_TRIANGLES, faces.size() * 3, GL_UNSIGNED_INT, 0);
         }

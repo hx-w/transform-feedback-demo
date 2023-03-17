@@ -2,7 +2,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "viewer.h"
+#include "render.h"
 
+namespace TFDEMO {
 void Viewer::processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -21,6 +23,20 @@ void Viewer::processInput(GLFWwindow* window) {
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         cameraPos += cameraMove * glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !key_T_pressed) {
+        render->active_flatten();
+        key_T_pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !key_P_pressed) {
+        render->pause_flatten();
+        key_P_pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE) {
+        key_T_pressed = false;
+    }
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
+        key_P_pressed = false;
     }
 }
 
@@ -115,4 +131,5 @@ void Viewer::mouse_button_callback(
                 return;
         }
     }
+}
 }

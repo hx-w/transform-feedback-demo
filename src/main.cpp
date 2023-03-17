@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     std::clog << "bound_length: " << bound_length << std::endl;
 
     std::vector<glm::vec3> mapped_boundary;
-    TFDEMO::Flatten::map_boundary(vertices, faces, edges_bound, mapped_boundary, bound_length);
+    TFDEMO::Flatten::map_boundary(vertices, faces, edges_bound, mapped_boundary, bound_length, 5);
 
     TFDEMO::Weights weights;
     TFDEMO::Flatten::init_weights(vertices, faces, edges_bound, edges_inner, weights);
@@ -30,12 +30,12 @@ int main(int argc, char** argv) {
         std::move(edges_bound), std::move(edges_inner), vts_bound, vts_inner
     );
 
-    // test
-    for (int i = 0; i < vts_bound.size(); ++i) {
-        vertices[vts_bound[i]].position = mapped_boundary[i];
-    }
-
-    render->set_mesh(vertices, faces);
+    auto param_ptr = std::make_shared<TFDEMO::FlattenParam>(
+        TFDEMO::FlattenParam{
+            vts_bound, vts_inner, mapped_boundary, weights
+        }
+    );
+    render->set_mesh(vertices, faces, param_ptr);
 
     return render->draw();
 }
