@@ -117,7 +117,7 @@ void Render::set_mesh(Vertices& vs, Faces& fs) {
     // specify the layout of the vertex data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, on_boundary));
+    glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, seq_ind));
     glEnableVertexAttribArray(1);
 
     // unbind the VAO

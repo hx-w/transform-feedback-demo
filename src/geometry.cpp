@@ -41,12 +41,12 @@ void load_obj(
 
             if (words[0] == "v") {
                 vertices.emplace_back(Vertex{
-                    stof(words[1]), stof(words[2]), stof(words[3]), false
+                    glm::vec3(stof(words[1]), stof(words[2]), stof(words[3])), false
                 });
             }
             else if (words[0] == "f") {
                 faces.emplace_back(Face{
-                    stoi(words[1]) - 1, stoi(words[2]) - 1, stoi(words[3]) - 1
+                    glm::uvec3(stoi(words[1]) - 1, stoi(words[2]) - 1, stoi(words[3]) - 1)
                 });
             }
         }
