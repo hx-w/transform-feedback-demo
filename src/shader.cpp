@@ -78,15 +78,16 @@ void Shader::fromFile(const std::string& vertexPath,
     const GLchar* varyings[] = {
         "newPos",
         "gl_NextBuffer",
-        "Aii_out"
-        // "Bi_out",
-        // "prod_out"
+        "Aii_out",
+        "Bi_out",
+        "prod_out"
     };
     glTransformFeedbackVaryings(
         ID,
         sizeof(varyings)/ sizeof(varyings[0]),
         varyings,
         GL_INTERLEAVED_ATTRIBS
+        // GL_SEPARATE_ATTRIBS
     );
 
     glLinkProgram(ID);

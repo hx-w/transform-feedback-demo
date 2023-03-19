@@ -1,9 +1,9 @@
 #version 330 core
 
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in float Aii;
-layout (location = 2) in vec3 Bi;
-layout (location = 3) in vec3 prod;
+layout (location = 1) in vec3 Bi;
+layout (location = 2) in vec3 prod;
+layout (location = 3) in float Aii;
 
 out vec3 newPos;
 out float Aii_out;
@@ -27,6 +27,6 @@ void main() {
     }
 
     gl_Position = projection * view * vec4(newPos, 1.0f);
-    objectColor = vec3(0.0, 0.0, 0.0);
+    objectColor = vec3(1.0, 1.0, 1.0);
 }
 

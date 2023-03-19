@@ -8,9 +8,9 @@ namespace TFDEMO {
 
 struct Vertex {
     glm::vec3 position;
-    float Aii = -1.0f;
     glm::vec3 Bi = glm::vec3(0.0f);
     glm::vec3 prod = glm::vec3(0.0f);
+    float Aii = -1.0f;
 };
 
 struct Face {

@@ -67,7 +67,7 @@ void Render::init(int width, int height, const std::string& title) {
 
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_SMOOTH);
-    glEnable(GL_CULL_FACE);
+    // glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_MULTISAMPLE);
@@ -99,8 +99,11 @@ void Render::cleanup() {
 void Render::set_mesh(Vertices& vs, Faces& fs, std::shared_ptr<FlattenParam> prm) {
     vertices.swap(vs);
     faces.swap(fs);
+    vertices_backup.clear();
+    vertices_backup.assign(vertices.begin(), vertices.end());
     // transfer prm to param
     param = prm;
+
     // create a vertex array object
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -118,11 +121,11 @@ void Render::set_mesh(Vertices& vs, Faces& fs, std::shared_ptr<FlattenParam> prm
     // specify the layout of the vertex data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Aii));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bi));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bi));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, prod));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, prod));
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Aii));
     glEnableVertexAttribArray(3);
 
     // unbind the VAO
@@ -142,12 +145,12 @@ void Render::set_mesh(Vertices& vs, Faces& fs, std::shared_ptr<FlattenParam> prm
     // create transform feedback buffer object
     glGenBuffers(2, tbos); // 第一个tbo存newPos, 第二个tbo存其他的
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, tbos[0]);
-    glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, vertices.size() * sizeof(glm::vec3), NULL, GL_DYNAMIC_READ);
+    glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER,
+        vertices.size() * sizeof(glm::vec3), NULL, GL_DYNAMIC_READ);
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, tbos[1]);
     glBufferData(
         GL_TRANSFORM_FEEDBACK_BUFFER,
-        // vertices.size() * (sizeof(glm::vec3) * 2+ sizeof(float)),
-        vertices.size() * (sizeof(float)),
+        vertices.size() * (sizeof(glm::vec3) * 2 + sizeof(float)),
         NULL, GL_DYNAMIC_READ
     );
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
@@ -169,7 +172,7 @@ void Render::active_flatten() {
         for (auto i = 0; i < param->vts_bound.size(); ++i) {
             auto& v = vertices[param->vts_bound[i]];
             v.position = param->mapped_boundary[i];
-            v.Aii = 0;
+            v.Aii = -1;
         }
 
         // compute Bi, save Aii
@@ -188,7 +191,6 @@ void Render::active_flatten() {
         flatten_stage = 2;
         Flatten::update_prod(vertices, param.get(), vts_adj, nullptr);
     }
-    std::clog << "flatten stage: " << flatten_stage << std::endl;
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
@@ -208,17 +210,23 @@ int Render::draw() {
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // set background
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         viewer.processInput(window);
-        glLineWidth(2.0f);
+        
+        glPointSize(5.0f);
         if (vao != 0) {
             shader.use();
             glBindVertexArray(vao);
-            // draw triangles
             glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfo);
-            glBeginTransformFeedback(GL_TRIANGLES);
-            glDrawElements(GL_TRIANGLES, faces.size() * 3, GL_UNSIGNED_INT, 0);
+            // draw triangles
+            glBeginTransformFeedback(draw_mode);
+            if (draw_mode == GL_POINTS) {
+                glDrawArrays(draw_mode, 0, vertices.size());
+            }
+            else if (draw_mode == GL_TRIANGLES) {
+                glDrawElements(draw_mode, faces.size() * 3, GL_UNSIGNED_INT, 0);
+            }
             glEndTransformFeedback();
 
             transform_feedback_process();
@@ -255,6 +263,7 @@ int Render::draw() {
 
 void Render::transform_feedback_process() {
     if (flatten_stage < 2) return;
+    glFlush();
     // read tbos[0]
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, tbos[0]);
 
@@ -278,23 +287,20 @@ void Render::transform_feedback_process() {
     );
 
     // read tbos[1]
+    struct VaryPack {
+        float Aii_out;
+        glm::vec3 Bi_out;
+        glm::vec3 prod_out;
+    };
+
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, tbos[1]);
-    float* feedback2 = new float[vertices.size()];
+    VaryPack* feedback_check = new VaryPack[vertices.size()];
     glGetBufferSubData(
         GL_TRANSFORM_FEEDBACK_BUFFER,
         0,
-        vertices.size() * sizeof(float),
-        feedback2
+        sizeof(VaryPack) * vertices.size(),
+        feedback_check
     );
-
-    float s1 = 0, s2 = 0;
-    for (auto i = 0; i < vertices.size(); ++i) {
-        // if (feedback2[i] != vertices[i].Aii)
-            // std::clog << feedback2[i] << " " << vertices[i].Aii << std::endl;
-        s1 += feedback2[i];
-        s2 += vertices[i].Aii;
-    }
-    std::clog << s1 << " " << s2 << " " << vertices.size() << std::endl;
 
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
 
@@ -307,7 +313,23 @@ void Render::transform_feedback_process() {
     glBindVertexArray(0);
 
     delete[] feedback;
-    delete[] feedback2;
+    delete[] feedback_check;
+}
+
+void Render::change_draw_mode(GLenum mode) {
+    if (mode != GL_POINTS && mode != GL_TRIANGLES) return;
+
+    draw_mode = mode;
+
+    vertices.clear();
+    vertices.assign(vertices_backup.begin(), vertices_backup.end());
+
+    flatten_stage = 0;    
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 }

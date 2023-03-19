@@ -38,6 +38,20 @@ void Viewer::processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
         key_P_pressed = false;
     }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS && !key_lb_pressed) {
+        render->change_draw_mode(GL_POINTS);
+        key_lb_pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_RELEASE) {
+        key_lb_pressed = false;
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS && !key_lb_pressed) {
+        render->change_draw_mode(GL_TRIANGLES);
+        key_rb_pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_RELEASE) {
+        key_rb_pressed = false;
+    }
 }
 
 void Viewer::framebuffer_size_callback(

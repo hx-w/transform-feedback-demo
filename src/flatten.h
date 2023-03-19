@@ -73,7 +73,8 @@ public:
         Vertices&,
         FlattenParam*,
         std::vector<std::set<int>>&,
-        glm::vec3*
+        glm::vec3*,
+        bool cpu = true
     );
 };
 

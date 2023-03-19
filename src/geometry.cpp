@@ -41,7 +41,7 @@ void load_obj(
 
             if (words[0] == "v") {
                 vertices.emplace_back(Vertex{
-                    glm::vec3(stof(words[1]), stof(words[2]), stof(words[3])), false
+                    glm::vec3(stof(words[1]), stof(words[2]), stof(words[3]))
                 });
             }
             else if (words[0] == "f") {

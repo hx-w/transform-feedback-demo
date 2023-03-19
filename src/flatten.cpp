@@ -267,29 +267,26 @@ void Flatten::update_prod(
     Vertices& vertices,
     FlattenParam* param,
     std::vector<std::set<int>>& vts_adj,
-    glm::vec3* new_vertices
+    glm::vec3* new_vertices,
+    bool cpu
 ) {
-    // if (new_vertices != nullptr) {
-    //     std::clog << new_vertices[2].x << " " << new_vertices[2].y << " " << new_vertices[2].z << std::endl;
-    //     std::clog << vertices[2].position.x << " " << vertices[2].position.y << " " << vertices[2].position.z << std::endl;
-    //     std::clog << "----------" << std::endl;
-    // }
+
     for (auto i = 0; i < param->vts_inner.size(); ++i) {
         auto vi = param->vts_inner[i];
         auto& v = vertices[vi];
         v.prod = glm::vec3(0.0);
         for (auto vj : vts_adj[vi]) {
             auto val = get_val(param->weights, vi, vj);
-            if (new_vertices == nullptr) {
+            if (new_vertices == nullptr || cpu) {
                 v.prod += float(val) * vertices[vj].position;
             }
             else {
-                v.prod += float(val) * vertices[vj].position;
-                // v.prod += val * new_vertices[vj];
+                v.prod += val * new_vertices[vj];
             }
-
         }
-        v.position = (v.Bi - v.prod) / float(v.Aii);
+        if (cpu) {
+            v.position = (v.Bi - v.prod) / v.Aii;
+        }
     }
 }
 
