@@ -11,16 +11,12 @@ namespace TFDEMO {
 class Render;
 class Viewer {
 public:
-    Viewer(std::shared_ptr<Render> render): render(render) {};
-
-    void set(std::shared_ptr<Render> render) {
-        this->render = render;
-    }
+    Viewer(Render* render): render(render) {};
 
     void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-    void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+    void mouse_callback(GLFWwindow* window, float xpos, float ypos);
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+    void scroll_callback(GLFWwindow* window, float xoffset, float yoffset);
     void processInput(GLFWwindow* window);
 
     // camera
@@ -53,7 +49,7 @@ public:
     int width = 800;
     int height = 600;
 
-    std::shared_ptr<Render> render;
+    Render* render;
 
     bool key_T_pressed = false;
     bool key_P_pressed = false;

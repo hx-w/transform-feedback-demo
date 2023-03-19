@@ -51,7 +51,7 @@ void Viewer::framebuffer_size_callback(
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
 void Viewer::mouse_callback(
-    GLFWwindow* window, double xposIn, double yposIn
+    GLFWwindow* window, float xposIn, float yposIn
 ) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
@@ -92,7 +92,7 @@ void Viewer::mouse_callback(
 }
 
 void Viewer::scroll_callback(
-    GLFWwindow* window, double xoffset, double yoffset
+    GLFWwindow* window, float xoffset, float yoffset
 ) {
     fov -= (float)yoffset;
     if (fov < 1.0f)

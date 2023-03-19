@@ -150,7 +150,7 @@ void Flatten::map_boundary(
             bound_point.z = -(scale / 2);
             bound_point.y = (scale / 2) - scale * ((ratio - 0.75) / 0.25);
         }
-        boundary.push_back(bound_point);
+        boundary.emplace_back(bound_point);
     }
 }
 
@@ -239,7 +239,7 @@ void Flatten::transfer_edges_to_vertex_indices(
 				std::cout << "Error: edges_bound is not topology sorted" << std::endl;
 				continue;
 			}
-			if (find(vts_bound.begin(), vts_bound.end(), picked) == vts_bound.end()) {
+			if (std::find(vts_bound.begin(), vts_bound.end(), picked) == vts_bound.end()) {
 				vts_bound.emplace_back(picked);
 			}
 		}
@@ -263,5 +263,34 @@ void Flatten::transfer_edges_to_vertex_indices(
     Edges().swap(edges_inner);
 }
 
+void Flatten::update_prod(
+    Vertices& vertices,
+    FlattenParam* param,
+    std::vector<std::set<int>>& vts_adj,
+    glm::vec3* new_vertices
+) {
+    // if (new_vertices != nullptr) {
+    //     std::clog << new_vertices[2].x << " " << new_vertices[2].y << " " << new_vertices[2].z << std::endl;
+    //     std::clog << vertices[2].position.x << " " << vertices[2].position.y << " " << vertices[2].position.z << std::endl;
+    //     std::clog << "----------" << std::endl;
+    // }
+    for (auto i = 0; i < param->vts_inner.size(); ++i) {
+        auto vi = param->vts_inner[i];
+        auto& v = vertices[vi];
+        v.prod = glm::vec3(0.0);
+        for (auto vj : vts_adj[vi]) {
+            auto val = get_val(param->weights, vi, vj);
+            if (new_vertices == nullptr) {
+                v.prod += float(val) * vertices[vj].position;
+            }
+            else {
+                v.prod += float(val) * vertices[vj].position;
+                // v.prod += val * new_vertices[vj];
+            }
+
+        }
+        v.position = (v.Bi - v.prod) / float(v.Aii);
+    }
+}
 
 }

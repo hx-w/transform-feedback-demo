@@ -3,6 +3,8 @@
 #include <vector>
 #include <unordered_map>
 #include <utility>
+#include <algorithm>
+#include <set>
 #include <glm/glm.hpp>
 #include "geometry.h"
 
@@ -21,6 +23,18 @@ struct pair_hash {
 };
 
 using Weights = std::unordered_map<OrderedEdge, float, pair_hash>;
+
+static float get_val(const Weights& weights, int v1, int v2) {
+    if (v1 > v2) {
+        std::swap(v1, v2);
+    }
+    auto it = weights.find(std::make_pair(v1, v2));
+    if (it != weights.end()) {
+        return it->second;
+    } else {
+        return 0.0f;
+    }
+}
 
 struct FlattenParam {
     std::vector<int> vts_bound;
@@ -53,6 +67,13 @@ public:
 
     static void transfer_edges_to_vertex_indices(
         Edges&&, Edges&&, std::vector<int>&, std::vector<int>&
+    );
+
+    static void update_prod(
+        Vertices&,
+        FlattenParam*,
+        std::vector<std::set<int>>&,
+        glm::vec3*
     );
 };
 

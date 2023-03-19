@@ -73,10 +73,24 @@ void Shader::fromFile(const std::string& vertexPath,
     glAttachShader(ID, fragment);
     if (geometryPath.length() != 0)
         glAttachShader(ID, geometry);
+
+    // setup transform feedback
+    const GLchar* varyings[] = {
+        "newPos",
+        "gl_NextBuffer",
+        "Aii_out"
+        // "Bi_out",
+        // "prod_out"
+    };
+    glTransformFeedbackVaryings(
+        ID,
+        sizeof(varyings)/ sizeof(varyings[0]),
+        varyings,
+        GL_INTERLEAVED_ATTRIBS
+    );
+
     glLinkProgram(ID);
     checkCompileErrors(ID, "PROGRAM");
-    // delete the shaders as they're linked into our program now and no
-    // longer necessery
     glDeleteShader(vertex);
     glDeleteShader(fragment);
     if (geometryPath.length() != 0)

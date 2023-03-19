@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     std::clog << "bound_length: " << bound_length << std::endl;
 
     std::vector<glm::vec3> mapped_boundary;
-    TFDEMO::Flatten::map_boundary(vertices, faces, edges_bound, mapped_boundary, bound_length, 5);
+    TFDEMO::Flatten::map_boundary(vertices, faces, edges_bound, mapped_boundary, bound_length, 12);
 
     TFDEMO::Weights weights;
     TFDEMO::Flatten::init_weights(vertices, faces, edges_bound, edges_inner, weights);

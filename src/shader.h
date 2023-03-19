@@ -20,6 +20,7 @@ public:
                     const std::string& geometryPath = "");
 
     void fromCode(const std::string& vertexCode, const std::string& fragmentCode);
+
     // activate the shader
     // ------------------------------------------------------------------------
     void use();
