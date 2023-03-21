@@ -31,10 +31,14 @@ public:
 private:
     GLFWwindow* window;
     Shader shader;
+    Shader dot_shader;
 
     GLuint vao = 0;
     GLuint vbo = 0, ebo = 0;
     GLuint tbos[2], tfo = 0;
+
+    GLuint dot_vao = 0;
+    GLuint dot_vbo = 0;
 
     Vertices vertices_backup;
     Vertices vertices;

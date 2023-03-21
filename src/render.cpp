@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "render.h"
 
 namespace TFDEMO {
@@ -18,6 +17,26 @@ Render::Render(): viewer(this) {
         ASSETS_PATH "/shaders/demo.vert.glsl",
         ASSETS_PATH "/shaders/demo.frag.glsl"
     );
+    dot_shader = Shader(
+        ASSETS_PATH "/shaders/dot.vert.glsl",
+        ASSETS_PATH "/shaders/dot.frag.glsl",
+        ASSETS_PATH "/shaders/dot.geom.glsl"
+    );
+
+    glm::vec3 dot_list[] = {
+        glm::vec3(-0.0f, 0.0f, 1.0f),
+        glm::vec3(-0.0f, 1.0f, 0.0f),
+        glm::vec3(-0.0f, 0.0f, -1.0f),
+    };
+    glGenVertexArrays(1, &dot_vao);
+    glBindVertexArray(dot_vao);
+    glGenBuffers(1, &dot_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, dot_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(dot_list), dot_list, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 Render::~Render() {
@@ -215,7 +234,15 @@ int Render::draw() {
         viewer.processInput(window);
         
         glPointSize(5.0f);
-        if (vao != 0) {
+        if (viewer.key_H_pressed){
+            // draw dots
+            dot_shader.use();
+            glBindVertexArray(dot_vao);
+            glDrawArrays(GL_POINTS, 0, 3);
+            glBindVertexArray(0);
+        }
+
+        if (vao != 0 && !viewer.key_H_pressed) {
             shader.use();
             glBindVertexArray(vao);
             glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfo);
@@ -228,7 +255,8 @@ int Render::draw() {
                 glDrawElements(draw_mode, faces.size() * 3, GL_UNSIGNED_INT, 0);
             }
             glEndTransformFeedback();
-
+            glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
+            glBindVertexArray(0);
             transform_feedback_process();
         }
 
@@ -237,7 +265,7 @@ int Render::draw() {
 		viewer.lastFrame = currentFrame;
         auto projection = glm::perspective(
             glm::radians(viewer.fov),
-			float(viewer.width) /(viewer.height),
+			float(viewer.width) /float(viewer.height),
 			0.1f, 500.0f
 		);
 
@@ -249,10 +277,8 @@ int Render::draw() {
 
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
-        shader.setVec3("lightColor",  viewer.lightColor);
-        shader.setVec3("lightPos", viewer.lightPos);
-        shader.setVec3("viewPos", viewer.cameraPos);
-        shader.setBool("ignoreLight", true);
+        dot_shader.setMat4("projection", projection);
+        dot_shader.setMat4("view", view);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -263,7 +289,6 @@ int Render::draw() {
 
 void Render::transform_feedback_process() {
     if (flatten_stage < 2) return;
-    glFlush();
     // read tbos[0]
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, tbos[0]);
 

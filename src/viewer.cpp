@@ -52,6 +52,12 @@ void Viewer::processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_RELEASE) {
         key_rb_pressed = false;
     }
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !key_H_pressed) {
+        key_H_pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_RELEASE) {
+        key_H_pressed = false;
+    }
 }
 
 void Viewer::framebuffer_size_callback(

@@ -55,6 +55,7 @@ public:
     bool key_P_pressed = false;
     bool key_lb_pressed = false;
     bool key_rb_pressed = false;
+    bool key_H_pressed = false;
 };
 
 }

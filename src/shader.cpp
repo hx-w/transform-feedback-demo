@@ -66,6 +66,7 @@ void Shader::fromFile(const std::string& vertexPath,
         glShaderSource(geometry, 1, &gShaderCode, NULL);
         glCompileShader(geometry);
         checkCompileErrors(geometry, "GEOMETRY");
+        std::clog << "geometry shader inited" << std::endl;
     }
     // shader Program
     ID = glCreateProgram();
@@ -74,21 +75,23 @@ void Shader::fromFile(const std::string& vertexPath,
     if (geometryPath.length() != 0)
         glAttachShader(ID, geometry);
 
-    // setup transform feedback
-    const GLchar* varyings[] = {
-        "newPos",
-        "gl_NextBuffer",
-        "Aii_out",
-        "Bi_out",
-        "prod_out"
-    };
-    glTransformFeedbackVaryings(
-        ID,
-        sizeof(varyings)/ sizeof(varyings[0]),
-        varyings,
-        GL_INTERLEAVED_ATTRIBS
-        // GL_SEPARATE_ATTRIBS
-    );
+    if (geometryPath.empty()) {
+        // setup transform feedback
+        const GLchar* varyings[] = {
+                "newPos",
+                "gl_NextBuffer",
+                "Aii_out",
+                "Bi_out",
+                "prod_out"
+        };
+        glTransformFeedbackVaryings(
+                ID,
+                sizeof(varyings)/ sizeof(varyings[0]),
+                varyings,
+                GL_INTERLEAVED_ATTRIBS
+                // GL_SEPARATE_ATTRIBS
+        );
+    }
 
     glLinkProgram(ID);
     checkCompileErrors(ID, "PROGRAM");
