@@ -61,10 +61,10 @@ void Render::init(int width, int height, const std::string& title) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
     // GL 3.0 + GLSL 130
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
     glfwWindowHint(GLFW_SAMPLES, 4);
     // glfw window creation
@@ -176,6 +176,7 @@ void Render::set_mesh(Vertices& vs, Faces& fs, std::shared_ptr<FlattenParam> prm
 
     // create transform feedback object
     glGenTransformFeedbacks(1, &tfo);
+
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, tfo);
     glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tbos[0]);
     glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, tbos[1]);

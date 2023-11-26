@@ -37,5 +37,14 @@ int main(int argc, char** argv) {
     );
     render->set_mesh(vertices, faces, param_ptr);
 
+    {
+        std::clog << "\n";
+        std::clog << "'T' => press once to boundary mapping, press twice to flatten surface\n";
+        std::clog << "'[' => switch to pointcloud\n";
+        std::clog << "']' => switch to wireframe\n";
+        std::clog << "'WASD' => move camera\n";
+    }
+
+
     return render->draw();
 }
