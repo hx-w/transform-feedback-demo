@@ -1,0 +1,34 @@
+name: cmake-build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  build-windows-x86:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+      - name: Build
+        shell: cmd
+        run: |
+          md build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -G "NMake Makefiles" ..
+          nmake
+          cd ../
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: surface_flatten_demo.zip
+          path: |
+            ./build/demo.exe
+            assets/

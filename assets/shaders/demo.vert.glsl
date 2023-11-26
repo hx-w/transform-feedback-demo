@@ -27,6 +27,6 @@ void main() {
     }
 
     gl_Position = projection * view * vec4(newPos, 1.0f);
-    objectColor = vec3(1.0, 1.0, 1.0);
+    objectColor = vec3(0.0, 0.0, 0.0);
 }
 

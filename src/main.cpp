@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
     TFDEMO::Faces faces;
 
     // load and preprocess
-    TFDEMO::load_obj(ASSETS_PATH "/models/mesh.obj", vertices, faces);
+    TFDEMO::load_obj("assets/models/mesh.obj", vertices, faces);
     TFDEMO::Edges edges_bound, edges_inner;
     TFDEMO::Flatten::mark_edges(vertices, faces, edges_bound, edges_inner);
     float bound_length = 0;

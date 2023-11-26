@@ -11,16 +11,16 @@ namespace TFDEMO {
 Render::Render(): viewer(this) {
     // create a window with the specified width, height and title and initialize
     // OpenGL
-    init(800, 600, "Demo");
+    init(1200, 800, "Demo");
 
     shader = Shader(
-        ASSETS_PATH "/shaders/demo.vert.glsl",
-        ASSETS_PATH "/shaders/demo.frag.glsl"
+        "assets/shaders/demo.vert.glsl",
+        "assets/shaders/demo.frag.glsl"
     );
     dot_shader = Shader(
-        ASSETS_PATH "/shaders/dot.vert.glsl",
-        ASSETS_PATH "/shaders/dot.frag.glsl",
-        ASSETS_PATH "/shaders/dot.geom.glsl"
+        "assets/shaders/dot.vert.glsl",
+        "assets/shaders/dot.frag.glsl",
+        "assets/shaders/dot.geom.glsl"
     );
 
     glm::vec3 dot_list[] = {
@@ -229,7 +229,7 @@ int Render::draw() {
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // set background
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         viewer.processInput(window);
         
